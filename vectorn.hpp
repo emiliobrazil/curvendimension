@@ -51,6 +51,11 @@ public:
     /// @return  value of the i'th coordinate value.
     inline real  operator[] (unsigned i) const { assert(i<dim); return coord[i]; }
 
+    /// @brief Coordinate indexing
+    /// @param i  coordinate index.
+    /// @return  value of the i'th coordinate value.
+    inline real  at(unsigned i) const { assert(i<dim); return coord[i]; }
+
     //
     // Comparison operators
     //
@@ -58,9 +63,9 @@ public:
     /// @brief Equality operator
     /// @param v another vector
     /// @return whether this and v have equal coordinates within the error margin
-    inline bool operator==(const VectorN<real,dim> &v) const {
+    bool operator==(const VectorN<real,dim> &v) const {
         for (unsigned i = 0; i < dim; i++) {
-            real d = coord[i]-v.coord[i]; 
+            real d = std::abs(this->coord[i]-v.coord[i]);
             if (d > FEQ_EPS2) return false;
         }
         return true;
@@ -70,7 +75,7 @@ public:
     /// @param v another vector
     /// @return whether this and v have at least one distinct coordinate within 
     ///   the error margin
-    inline bool operator!=(const VectorN<real,dim>& v) const {
+    bool operator!=(const VectorN<real,dim>& v) const {
         return !(*this == v);
     }
     
@@ -84,7 +89,7 @@ public:
     inline VectorN<real,dim>& operator=(const VectorN<real,dim>& v) {
         for (unsigned i = 0; i < dim; i++) coord[i] = v.coord[i];
         return *this;
-    };
+    }
     
     /// @brief Vector sum assignment
     /// @param v another vector
@@ -92,7 +97,7 @@ public:
     inline VectorN<real,dim>& operator+=(const VectorN<real,dim>& v) {
         for (unsigned i = 0; i < dim; i++) coord[i] += v.coord[i];
         return *this;
-    };
+    }
     
     /// @brief Vector difference assignment
     /// @param v another vector
@@ -161,7 +166,7 @@ public:
     /// @return : symmetric vector
     inline VectorN<real,dim> operator-() const {
         VectorN<real,dim> r = *this;
-        for (unsigned i = 0; i < dim; i++) r.coord [i] = -r.coord[i];
+        for (unsigned i = 0; i < dim; i++) r.coord[i] = -r.coord[i];
         return r;
     } 
     
@@ -169,6 +174,15 @@ public:
     /// @param v: another vector
     /// @return : dot product
     inline real operator*(const VectorN<real,dim>& v) const {
+        real sum = 0;
+        for (unsigned i = 0; i < dim; i++) sum += coord[i]*v.coord[i];
+        return sum;
+    }
+
+    /// @brief Dot product
+    /// @param v: another vector
+    /// @return : dot product
+    inline real dot(const VectorN<real,dim>& v) const {
         real sum = 0;
         for (unsigned i = 0; i < dim; i++) sum += coord[i]*v.coord[i];
         return sum;
@@ -242,6 +256,18 @@ inline VectorN<real,dim> operator*(scalar s, const VectorN<real,dim>& v) {
 // Primitive function definitions
 //
 
+template < typename real >
+inline real minReal(real a , real b)
+{
+    return ( a < b ) ? a : b ;
+}
+
+template < typename real >
+inline real maxReal(real a , real b)
+{
+    return ( a > b ) ? a : b ;
+}
+
 /// Returns the Euclidian norm of a Vector
 template < typename real, unsigned int dim >
 inline real norm(const VectorN<real,dim>& v)
@@ -306,13 +332,13 @@ public:
     //
     
     /// Empty constructor
-    PointN () : VectorN<real,dim> () {};
+    PointN () : VectorN<real,dim> () {}
     
     /// Constructor from an array of coordinates
-    PointN (const real v[]) : VectorN<real,dim> (v) {};
+    PointN (const real v[]) : VectorN<real,dim> (v) {}
     
     /// Constructor from another VectorN
-    PointN (const VectorN<real,dim>& v) : VectorN<real,dim> (v) {}; 
+    PointN (const VectorN<real,dim>& v) : VectorN<real,dim> (v) {}
 
     /// Constructor from a single coordinate 
     PointN (const real v) : VectorN<real,dim> () {
@@ -354,7 +380,7 @@ public:
     ///    and p's
     inline PointN<real,dim> min(const PointN<real,dim> & p) const {
         PointN<real,dim> r;
-        for (int i = 0; i < dim; i++) r[i] = min(*this[i],p[i]);
+        for (int i = 0; i < dim; i++) r[i] = minReal(*this[i],p[i]);
         return r;
     }
 
@@ -364,7 +390,7 @@ public:
     ///     and p's
     inline PointN<real,dim> max(const PointN<real,dim> & p) const {
         PointN<real,dim> r;
-        for (int i = 0; i < dim; i++) r[i] = max(*this[i],p[i]);
+        for (int i = 0; i < dim; i++) r[i] = maxReal(*this[i],p[i]);
         return r;
     }
     
